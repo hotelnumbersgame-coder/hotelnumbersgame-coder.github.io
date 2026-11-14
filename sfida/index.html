@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hotel Numbers · Sfida del giorno</title>
+<meta name="description" content="Daily puzzle challenge at the Motel Faro. Same puzzle for everyone: can you beat it?">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Hotel Numbers · Sfida del giorno · Daily challenge">
+<meta property="og:description" content="Il puzzle di oggi è lo stesso per tutti: ci riesci anche tu? · Today's puzzle is the same for everyone. Can you do it too?">
+<meta property="og:image" content="https://hotelnumbersgame-coder.github.io/sfida/faro.png">
+<meta name="robots" content="noindex">
+<style>
+  /* Same colours as the game's book (BookColors in book_kit.dart). */
+  :root { --ink: #2a1c13; --muted: #7a5634; --paper: #fbf4e4; --leather: #2a1c13;
+          --brass: #c9a04e; --teal: #13797c; --gold: #f2bf3a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; background: var(--leather); color: var(--ink);
+         font: 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+         display: flex; align-items: center; justify-content: center; padding: 24px 16px; }
+  main { width: 100%; max-width: 420px; background: var(--paper); border: 3px solid var(--ink);
+         border-radius: 26px; box-shadow: 0 9px 0 #000; padding: 10px; }
+  .frame { border: 1.5px solid var(--brass); border-radius: 18px; padding: 22px 20px 18px;
+           text-align: center; }
+  .badge { width: 120px; height: 120px; display: block; margin: 0 auto 6px; }
+  .kicker { font-size: 12px; font-weight: 800; letter-spacing: .14em; color: var(--muted);
+            text-transform: uppercase; margin: 0; }
+  h1 { font-family: Georgia, "Times New Roman", serif; font-size: 34px; line-height: 1.1;
+       margin: 4px 0 10px; }
+  .stars { font-size: 30px; letter-spacing: 4px; margin: 0 0 8px; }
+  .lead { font-weight: 700; margin: 0 0 8px; }
+  .story { font-family: Georgia, serif; font-style: italic; color: #3d2a1c; margin: 0 0 20px; }
+  .store { display: block; text-decoration: none; color: #fff; background: var(--teal);
+           border: 2.5px solid var(--ink); border-radius: 30px; box-shadow: 0 5px 0 var(--ink);
+           padding: 13px 16px; margin: 0 0 14px; font-weight: 900; font-size: 17px; }
+  .store.soon { background: #8fa9a9; pointer-events: none; }
+  .store.second { background: #f6ebd3; color: var(--ink); }
+  footer { margin-top: 10px; font-size: 13px; color: var(--muted); }
+  footer a { color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <div class="frame">
+    <img class="badge" src="faro.png" alt="Motel Faro" width="120" height="120">
+    <p class="kicker" id="kicker">Hotel Numbers</p>
+    <h1 id="title">Sfida del giorno</h1>
+    <p class="stars" aria-hidden="true">⭐⭐⭐</p>
+    <p class="lead" id="lead"></p>
+    <p class="story" id="story"></p>
+    <a class="store" id="ios" href="#">App Store</a>
+    <a class="store second" id="android" href="#">Google Play</a>
+    <footer><a id="privacy" href="../privacy.html">Privacy</a></footer>
+  </div>
+</main>
+<script>
+  // The game's public name: the same as AppBrand.name in the app.
+  var APP_NAME = 'Hotel Numbers';
+  // Fill in the store pages and set LAUNCHED to true on launch day.
+  var LAUNCHED = false;
+  var STORES = {
+    ios: '',
+    android: 'https://play.google.com/store/apps/details?id=com.threelgames.hotelnumbers'
+  };
+
+  var T = {
+    it: { title: 'Sfida #{n}', daily: 'Sfida del giorno',
+          lead: 'Un amico ha vinto la sfida di oggi. Il puzzle è lo stesso per tutti: ci riesci anche tu?',
+          leadDaily: 'Ogni giorno una nuova sfida, la stessa per tutti. Ci riesci anche tu?',
+          story: 'Unisci i numeri, servi gli ospiti e aiuta a restaurare il Motel Faro, un vero hotel di famiglia a due passi dal mar Ionio.',
+          get: 'Scarica su {s}', soon: 'Presto su {s}', privacy: 'Privacy', privacyPage: 'privacy.html' },
+    en: { title: 'Challenge #{n}', daily: 'Daily challenge',
+          lead: "A friend beat today's challenge. The puzzle is the same for everyone. Can you do it too?",
+          leadDaily: 'A new challenge every day, the same for everyone. Can you do it?',
+          story: 'Merge the numbers, serve the guests and help restore the Motel Faro, a real family hotel a stone’s throw from the Ionian Sea.',
+          get: 'Get it on {s}', soon: 'Coming soon to {s}', privacy: 'Privacy', privacyPage: 'privacy-en.html' },
+    fr: { title: 'Défi #{n}', daily: 'Défi du jour',
+          lead: "Un ami a réussi le défi du jour. Le puzzle est le même pour tous : à toi de jouer !",
+          leadDaily: 'Chaque jour un nouveau défi, le même pour tous. Tu relèves le défi ?',
+          story: 'Assemble les nombres, sers les clients et aide à restaurer le Motel Faro, un vrai hôtel de famille à deux pas de la mer Ionienne.',
+          get: 'Télécharger sur {s}', soon: 'Bientôt sur {s}', privacy: 'Confidentialité', privacyPage: 'privacy-fr.html' },
+    es: { title: 'Reto #{n}', daily: 'Reto del día',
+          lead: 'Un amigo ha superado el reto de hoy. El puzle es el mismo para todos: ¿te atreves?',
+          leadDaily: 'Cada día un reto nuevo, el mismo para todos. ¿Te atreves?',
+          story: 'Une los números, atiende a los huéspedes y ayuda a restaurar el Motel Faro, un hotel familiar de verdad a un paso del mar Jónico.',
+          get: 'Descárgalo en {s}', soon: 'Muy pronto en {s}', privacy: 'Privacidad', privacyPage: 'privacy-es.html' },
+    de: { title: 'Challenge #{n}', daily: 'Challenge des Tages',
+          lead: 'Ein Freund hat die heutige Challenge geschafft. Das Rätsel ist für alle gleich. Schaffst du es auch?',
+          leadDaily: 'Jeden Tag eine neue Challenge, für alle gleich. Schaffst du sie?',
+          story: 'Verbinde die Zahlen, bediene die Gäste und hilf, das Motel Faro zu restaurieren, ein echtes Familienhotel nur einen Katzensprung vom Ionischen Meer.',
+          get: 'Jetzt bei {s}', soon: 'Bald bei {s}', privacy: 'Datenschutz', privacyPage: 'privacy-de.html' },
+    pt: { title: 'Desafio #{n}', daily: 'Desafio do dia',
+          lead: 'Um amigo venceu o desafio de hoje. O quebra-cabeça é o mesmo para todos: você consegue?',
+          leadDaily: 'Todo dia um novo desafio, o mesmo para todos. Você consegue?',
+          story: 'Junte os números, atenda os hóspedes e ajude a restaurar o Motel Faro, um hotel de família de verdade pertinho do mar Jônico.',
+          get: 'Baixe na {s}', soon: 'Em breve na {s}', privacy: 'Privacidade', privacyPage: 'privacy-pt.html' }
+  };
+
+  var params = new URLSearchParams(location.search);
+  // The friend reads the page in their own language; the sharer's one
+  // (l=) only when the browser's is not among the six.
+  function pick(code) { code = (code || '').slice(0, 2).toLowerCase(); return T[code] ? code : null; }
+  var lang = pick(navigator.language) || pick(params.get('l')) || 'en';
+  var t = T[lang];
+  document.documentElement.lang = lang;
+
+  var n = parseInt(params.get('n') || '', 10);
+  var hasNumber = String(n) === params.get('n') && n > 0 && n < 100000;
+  var heading = hasNumber ? t.title.replace('{n}', n) : t.daily;
+  document.getElementById('kicker').textContent = APP_NAME;
+  document.getElementById('title').textContent = heading;
+  document.getElementById('lead').textContent = hasNumber ? t.lead : t.leadDaily;
+  document.getElementById('story').textContent = t.story;
+  document.title = APP_NAME + ' · ' + heading;
+  var privacy = document.getElementById('privacy');
+  privacy.textContent = t.privacy;
+  privacy.href = '../' + t.privacyPage;
+
+  function store(id, name) {
+    var a = document.getElementById(id);
+    var ready = LAUNCHED && STORES[id];
+    a.textContent = (ready ? t.get : t.soon).replace('{s}', name);
+    if (ready) { a.href = STORES[id]; a.rel = 'noopener'; }
+    else { a.classList.add('soon'); a.removeAttribute('href'); a.setAttribute('aria-disabled', 'true'); }
+  }
+  store('ios', 'App Store');
+  store('android', 'Google Play');
+  // Android phones see Google Play first.
+  if (/android/i.test(navigator.userAgent)) {
+    var ios = document.getElementById('ios'), android = document.getElementById('android');
+    ios.parentNode.insertBefore(android, ios);
+    android.classList.remove('second');
+    ios.classList.add('second');
+  }
+</script>
+</body>
+</html>
